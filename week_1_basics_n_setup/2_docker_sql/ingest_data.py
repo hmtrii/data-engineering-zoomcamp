@@ -20,9 +20,9 @@ def main(params):
     table_name = params.table_name
     url = params.url
     
-    parquet_name = 'yellow_tripdata_2021-01.parquet'
-    if not os.path.isfile(parquet_name):
-        os.system(f"wget {url} -O {parquet_name}")
+    parquet_name = 'green_tripdata_2019-01.parquet'
+    # if not os.path.isfile(parquet_name):
+    #     os.system(f"wget {url} -O {parquet_name}")
 
     engine = create_engine(f'postgresql://{user}:{password}@{host}:{port}/{db}')
 
@@ -31,8 +31,8 @@ def main(params):
     for batch in parquet_file.iter_batches(batch_size=100000):
         start = time.time()
         df = batch.to_pandas()
-        df.tpep_pickup_datetime = pd.to_datetime(df.tpep_pickup_datetime)
-        df.tpep_dropoff_datetime = pd.to_datetime(df.tpep_dropoff_datetime)
+        df['tpep_pickup_datetime'] = pd.to_datetime(df.lpep_pickup_datetime)
+        df['tpep_dropoff_datetime'] = pd.to_datetime(df.lpep_dropoff_datetime)
         df.to_sql(name=table_name, con=engine, if_exists='append')
         end = time.time()
         print('inserted another chunk, took %.3f second' % (end - start))
